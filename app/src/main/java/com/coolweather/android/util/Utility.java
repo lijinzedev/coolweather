@@ -5,12 +5,25 @@ import android.text.TextUtils;
 import com.coolweather.android.db.City;
 import com.coolweather.android.db.County;
 import com.coolweather.android.db.Province;
+import com.coolweather.android.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Utility {
+    public static Weather handelWeatherResponse(String response)  {
+        try {
+            JSONObject jsonObject=new JSONObject(response);
+            JSONArray jsonArray=jsonObject.getJSONArray("HeWeather");
+            String weatherContent=jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherContent,Weather.class);
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static boolean handleProvinceResponse(String response){
         if(!TextUtils.isEmpty(response)){
 try {
@@ -57,7 +70,7 @@ try {
                         JSONObject countyobject = allcounty.getJSONObject(i);
                         County county = new County();
                         county.setCountyName(countyobject.getString("name"));
-                        county.setWeatherid(countyobject.getInt("weatherid"));
+                        county.setWeatherid(countyobject.getString("weather_id"));
                         county.setCityid(cityid);
                         county.save();
                     }

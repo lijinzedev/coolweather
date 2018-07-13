@@ -1,10 +1,12 @@
 package com.coolweather.android.fgm;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.coolweather.android.R;
+import com.coolweather.android.activity.WeatherActivity;
 import com.coolweather.android.db.City;
 import com.coolweather.android.db.County;
 import com.coolweather.android.db.Province;
@@ -53,6 +56,7 @@ public class ChooseAreaFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.choose_area,container,false);
+        Log.d("Lijinze", "onCreate: "+"执行碎片");
         titletext=(TextView)view.findViewById(R.id.title_text);
         backButton=(Button)view.findViewById(R.id.back_button);
         listView=(ListView)view.findViewById(R.id.list_view);
@@ -74,6 +78,12 @@ public class ChooseAreaFragment extends Fragment {
                 else if (currentlevel==LEVEL_CITY){
                     seletedcity=cityList.get(position);
                     queryCounty();
+                }else if (currentlevel==LEVEL_COUNTY){
+                    String weatherid=countyList.get(position).getWeatherid();
+                    Intent intent=new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherid);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -115,11 +125,13 @@ titletext.setText(seletedcity.getCityName());
         backButton.setVisibility(View.VISIBLE);
 countyList=DataSupport.where("cityid=?",String.valueOf(seletedcity.getId())).find(County.class);
 if (countyList.size()>0){
+    datalist.clear();
     for(County county:countyList){
         datalist.add(county.getCountyName());
     }
     adapter.notifyDataSetChanged();
     listView.setSelection(0);
+     currentlevel=LEVEL_COUNTY;
 }else {
     int citycode=seletedcity.getCityCode();
     int provinceCode=seletedprovince.getProvinceCode();
